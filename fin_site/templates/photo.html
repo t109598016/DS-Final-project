@@ -1,0 +1,195 @@
+{% load static %}
+<html>
+ <head><title>What kind of fish is this? | 上傳圖片</title> <meta charset="UTF-8"></head>
+ <style>
+	.inputfile {
+		weight:1em;
+		height:1em;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		z-index: -1;
+	}
+	.inputfile + label {
+		background-color: transparent;
+		border-radius: 3px;
+		border: 0;
+		box-shadow: inset 0 0 0 2px #fff;
+		color: #fff;
+		cursor: pointer;
+		font-size: 0.8em;
+		font-weight: 600;
+		width: 100px;
+		height: 100px;
+		letter-spacing: 0.225em;
+		line-height: 5em;
+		padding:1em 2.5em;
+		margin:0.5em;
+		text-align: center;
+	}
+
+	.inputfile:focus + label,
+	.inputfile + label:hover {
+		background-color: rgba(144, 144, 144, 0.25);
+		outline: 1px dotted #000;
+		outline: -webkit-focus-ring-color auto 5px;
+	}
+    input[type="submit"],
+	submit,
+	.submit {
+		background-color: transparent;
+		border-radius: 3px;
+		border: 0;
+		box-shadow: inset 0 0 0 2px #fff;
+		color: #fff;
+		cursor: pointer;
+		font-size: 0.8em;
+		font-weight: 600;
+		height: 3.10em;
+		weight:3.00em;
+		letter-spacing: 0.225em;
+		line-height: 3.125em;
+		padding: 0 2.75em;
+		text-align: center;
+	}
+		input[type="submit"]:hover,		
+		submit:hover,
+		.submit:hover {
+			background-color: rgba(144, 144, 144, 0.25);
+		}
+
+		input[type="submit"]:active,
+		submit:active,
+		.submit:active {
+			background-color: rgba(144, 144, 144, 0.5);
+		}
+	
+body {
+	background-image: url({% static 'slide02.jpg' %});
+	background-size: 100%;
+}
+h1{
+color: #FFFFFF;
+font-size:60px;
+margin:3em 0 0.3em 0;
+
+}
+h2{
+ color:#FFFFFF;
+ ALIGN:center ;
+ }
+</style>
+ 
+ 
+  <script src="http://i.gtimg.cn/qzone/biz/gdt/lib/jquery/jquery-2.1.4.js?max_age=31536000"></script>
+
+  <script>
+  
+  $(function(){  
+    $('#upLoad').on('change',function(){  
+        var filePath = $(this).val(),         //獲取到input的value，裏面是文檔的路徑  
+            fileFormat = filePath.substring(filePath.lastIndexOf(".")).toLowerCase(),  
+            imgBase64 = '',      //存儲圖片的imgBase64  
+            fileObj = document.getElementById('upLoad').files[0]; //上傳文檔的對象,要這樣寫才行，用jquery寫法獲取不到對象  
+              
+        // 檢查是否是圖片  
+        if( !fileFormat.match(/.png|.jpg|.jpeg/) ) {  
+            alert('上傳錯誤,文檔格式必須為：png/jpg/jpeg');  
+            return;    
+        }  
+  
+        // 調用函數，對圖片進行壓縮  
+        compress(fileObj,function(imgBase64){  
+            imgBase64 = imgBase64;    //存儲轉換的base64編碼  
+            $('#viewImg').attr('src',imgBase64); //顯示預覽圖片  
+        });  
+    });  
+  
+     // 不對圖片進行壓縮，直接轉成base64  
+    function directTurnIntoBase64(fileObj,callback){  
+        var r = new FileReader();  
+        // 轉成base64  
+        r.onload = function(){  
+           //變成字符串  
+            imgBase64 = r.result;  
+            console.log(imgBase64);  
+            callback(imgBase64);  
+        }  
+        r.readAsDataURL(fileObj);    //轉成Base64格式  
+    }  
+  
+       // 對圖片進行壓縮  
+    function compress(fileObj, callback) {   
+        if ( typeof (FileReader) === 'undefined') {    
+            console.log("當前瀏覽器內核不支持base64圖標壓縮");    
+            //調用上傳方式不壓縮    
+            directTurnIntoBase64(fileObj,callback);  
+        } else {    
+            try {      
+                var reader = new FileReader();    
+                reader.onload = function (e) {    
+                    var image = $('<img/>');    
+                    image.load(function(){    
+                        square = 500,   //定義畫布的大小，也就是圖片壓縮之後的像素  
+                        canvas = document.createElement('canvas'),   
+                        context = canvas.getContext('2d'),  
+                        imageWidth = 350,    //壓縮圖片的大小  
+                        imageHeight = 350,   
+                        offsetX = 0,   
+                        offsetY = 0,  
+                        data = '';   
+  
+                        canvas.width = square;    
+                        canvas.height = square;   
+                        context.clearRect(0, 0, square, square);     
+  
+                        if (this.width > this.height) {    
+                            imageWidth = Math.round(square * this.width / this.height);    
+                            imageHeight = square;    
+                            offsetX = - Math.round((imageWidth - square) / 2);    
+                        } else {    
+                            imageHeight = Math.round(square * this.height / this.width);    
+                            imageWidth = square;    
+                            offsetY = - Math.round((imageHeight - square) / 2);    
+                        }    
+                        context.drawImage(this, offsetX, offsetY, imageWidth, imageHeight);    
+                        var data = canvas.toDataURL('image/jpeg');    
+                        //壓縮完成執行回調    
+                         callback(data);    
+                    });    
+                    image.attr('src', e.target.result);    
+                };    
+                reader.readAsDataURL(fileObj);    
+            }catch(e){    
+                console.log("壓縮失敗!");    
+                //調用直接上傳方式  不壓縮   
+                directTurnIntoBase64(fileObj,callback);   
+            }    
+        }  
+    }  
+});  
+  
+ </script>
+
+ <body> <center>
+<h1><b>魚類辨識系統</b></h1>
+<HR width="20%">
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+{{form.as_p}}
+
+
+<input type="file" id="upLoad" name="image" class="inputfile" />
+<label for="upLoad">選擇圖片</label>
+
+<input type='submit' value='看答案'>
+</form>
+ <div id='previewImg'>  
+        <img src="" id='viewImg'/>  
+    </div>  
+	
+</body> 
+</html>
+{%if label%}
+	<h2><center><br>有{{proba}}%的機率是:{{label}} !</h2>
+{%endif%}
